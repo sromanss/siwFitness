@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import it.uniroma3.siw.model.Allenamento;
 import it.uniroma3.siw.service.AllenamentoService;
 import it.uniroma3.siw.service.CredentialsService;
+import it.uniroma3.siw.service.UserService;
 import jakarta.validation.Valid;
 import it.uniroma3.siw.model.*;
 
@@ -29,24 +31,26 @@ public class AllenamentoController {
     @Autowired
     private CredentialsService credentialsService;
     
-    // Visualizza tutti gli allenamenti
+    @Autowired
+    private UserService userService;
+
+    
     @GetMapping("/allenamenti")
     public String getAllenamenti(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        User currentUser = getCurrentUser(authentication);
         
-        // Trova l'utente autenticato
-        Credentials credentials = credentialsService.findByUsername(username);
-        if (credentials != null && credentials.getUser() != null) {
+        if (currentUser != null) {
             // Mostra solo gli allenamenti dell'utente autenticato
-            model.addAttribute("allenamenti", allenamentoService.findByUtente(credentials.getUser()));
+            model.addAttribute("allenamenti", allenamentoService.findByUtente(currentUser));
         } else {
             model.addAttribute("allenamenti", Collections.emptyList());
         }
-        
+
         addAuthenticationStatus(model);
         return "allenamenti";
     }
+
 
     
     // Visualizza un singolo allenamento
@@ -71,29 +75,31 @@ public class AllenamentoController {
         return "formNewAllenamento";
     }
     
-    // Salva nuovo allenamento
     @PostMapping("/allenamento")
-    public String newAllenamento(@Valid @ModelAttribute("allenamento") Allenamento allenamento, 
-                                BindingResult bindingResult, Model model) {
-        
+    public String newAllenamento(@Valid @ModelAttribute("allenamento") Allenamento allenamento,
+            BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             addAuthenticationStatus(model);
             return "formNewAllenamento";
         }
-        
-        // Ottieni l'utente autenticato
+
+        // Ottieni l'utente corrente (funziona per entrambi i tipi di autenticazione)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        User currentUser = getCurrentUser(authentication);
         
-        // Trova l'utente nel database
-        Credentials credentials = credentialsService.findByUsername(username);
-        if (credentials != null && credentials.getUser() != null) {
-            allenamento.setUtente(credentials.getUser());
+        if (currentUser != null) {
+            allenamento.setUtente(currentUser);
+            allenamentoService.save(allenamento);
+        } else {
+            // Gestione errore se non si riesce a trovare l'utente
+            model.addAttribute("error", "Errore nell'identificazione dell'utente");
+            addAuthenticationStatus(model);
+            return "formNewAllenamento";
         }
-        
-        allenamentoService.save(allenamento);
+
         return "redirect:/allenamenti";
     }
+
 
 
     
@@ -108,7 +114,6 @@ public class AllenamentoController {
         }
         return "redirect:/allenamenti";
     }
-
 
 
     // Aggiorna allenamento esistente
@@ -160,6 +165,29 @@ public class AllenamentoController {
             model.addAttribute("isAdmin", false);
         }
     }
+    
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            // Utente OAuth (Google/GitHub)
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            String email = oauthToken.getPrincipal().getAttribute("email");
+            
+            // Gestione specifica per GitHub se email è null
+            if (email == null && "github".equals(oauthToken.getAuthorizedClientRegistrationId())) {
+                String login = oauthToken.getPrincipal().getAttribute("login");
+                email = login + "@github.local";
+            }
+            
+            return userService.findByEmail(email);
+            
+        } else {
+            // Utente tradizionale
+            String username = authentication.getName();
+            Credentials credentials = credentialsService.findByUsername(username);
+            return credentials != null ? credentials.getUser() : null;
+        }
+    }
+
 
     
 

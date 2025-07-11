@@ -37,29 +37,30 @@ public class AuthConfiguration {
         httpSecurity
             .csrf().and().cors().disable()
             .authorizeHttpRequests()
-            // Permetti accesso a pagine pubbliche
             .requestMatchers(HttpMethod.GET, "/", "/index", "/login", "/register", "/css/**", "/images/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/login", "/register").permitAll()
-            // Solo amministratori possono accedere alle funzioni admin
             .requestMatchers(HttpMethod.GET, "/adminHome/**").hasAnyAuthority("ADMIN")
             .requestMatchers(HttpMethod.POST, "/adminHome/**").hasAnyAuthority("ADMIN")
-            // Tutte le altre richieste richiedono autenticazione
             .anyRequest().authenticated()
-            
-            .and().formLogin()
-            .loginPage("/login")
-            .permitAll()
-            .defaultSuccessUrl("/success", true)
-            .failureUrl("/login?error=true")
-            
-            .and().logout()
-            .logoutUrl("/logout")
-            .logoutSuccessUrl("/")
-            .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID")
-            .clearAuthentication(true).permitAll();
+            .and()
+            .formLogin()
+                .loginPage("/login")
+                .permitAll()
+                .defaultSuccessUrl("/success", true)
+                .failureUrl("/login?error=true")
+            .and()
+            .oauth2Login()  
+                .loginPage("/login")
+                .defaultSuccessUrl("/success", true)
+            .and()
+            .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .clearAuthentication(true)
+                .permitAll();
 
         return httpSecurity.build();
     }
-
 }

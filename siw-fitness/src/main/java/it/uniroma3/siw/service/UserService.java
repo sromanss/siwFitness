@@ -19,6 +19,10 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
     
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public Iterable<User> findAll() {
         return userRepository.findAll();
     }
@@ -28,6 +32,10 @@ public class UserService {
     }
 
     public User findOrCreateOAuthUser(String email, String name) {
+    	if (email == null || name == null) {
+            throw new IllegalArgumentException("Email e nome non possono essere null");
+        }
+    	
         // Prima cerca se esiste già un utente con questa email
         User existingUser = userRepository.findByEmail(email);
         
@@ -36,17 +44,11 @@ public class UserService {
         }
         
         // Se non esiste, crea un nuovo utente
+     // Crea nuovo utente
         User newUser = new User();
         newUser.setEmail(email);
-        
-        // Estrai nome e cognome dalla stringa name
-        String[] nameParts = name.split(" ", 2);
-        newUser.setNome(nameParts[0]);
-        if (nameParts.length > 1) {
-            newUser.setCognome(nameParts[1]);
-        } else {
-            newUser.setCognome(""); // Cognome vuoto se non fornito
-        }
+        newUser.setNome(name);
+        // Imposta altri campi necessari
         
         return userRepository.save(newUser);
     }

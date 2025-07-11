@@ -12,7 +12,7 @@ public class User {
     @Column(nullable = false)
     private String nome;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String cognome;
     
     @Column(nullable = false, unique = true)

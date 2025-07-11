@@ -62,25 +62,73 @@ public class AuthController {
         if (authentication instanceof AnonymousAuthenticationToken) {
             return "redirect:/login";
         }
-        
+
         // Gestione utenti OAuth
         if (authentication instanceof OAuth2AuthenticationToken) {
             OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            
+            String registrationId = oauthToken.getAuthorizedClientRegistrationId();
             String email = oauthToken.getPrincipal().getAttribute("email");
             String name = oauthToken.getPrincipal().getAttribute("name");
             
-            // Crea o trova l'utente OAuth
-            User user = userService.findOrCreateOAuthUser(email, name);
+            // Gestione specifica per GitHub
+            if ("github".equals(registrationId)) {
+                // Se email è null, usa il login come email
+                if (email == null) {
+                    String login = oauthToken.getPrincipal().getAttribute("login");
+                    if (login != null) {
+                        email = login + "@github.local";
+                    } else {
+                        // Fallback se anche login è null
+                        email = "github_user_" + System.currentTimeMillis() + "@github.local";
+                    }
+                }
+                
+                // Se name è null, usa il login
+                if (name == null) {
+                    name = oauthToken.getPrincipal().getAttribute("login");
+                    if (name == null) {
+                        name = "GitHub User";
+                    }
+                }
+            }
             
-            return "redirect:/";
-        } 
-        
+            // Gestione per Google (già funzionante, ma aggiungiamo controlli di sicurezza)
+            if ("google".equals(registrationId)) {
+                if (email == null) {
+                    System.err.println("Google non ha fornito email!");
+                    return "redirect:/login?error=oauth";
+                }
+                if (name == null) {
+                    name = "Google User";
+                }
+            }
+            
+            // Verifica finale che email non sia null
+            if (email == null) {
+                System.err.println("Impossibile ottenere email dal provider OAuth: " + registrationId);
+                return "redirect:/login?error=oauth";
+            }
+            
+            try {
+                // Crea o trova l'utente OAuth
+                User user = userService.findOrCreateOAuthUser(email, name);
+                return "redirect:/";
+            } catch (Exception e) {
+                System.err.println("Errore durante la creazione dell'utente OAuth: " + e.getMessage());
+                e.printStackTrace();
+                return "redirect:/login?error=oauth";
+            }
+        }
+
         // Gestione utenti tradizionali
         boolean isAdmin = authentication.getAuthorities().stream()
             .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
         
         return isAdmin ? "redirect:/adminHome" : "redirect:/";
     }
+
+    
 
 
 
