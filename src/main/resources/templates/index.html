@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fitness App - Home</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8f9fa; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .auth-header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            border-bottom: 2px solid #007bff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .auth-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .auth-menu a {
+            margin-left: 10px;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .header { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .allenamento-card { 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .btn { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            display: inline-block; 
+            margin: 5px; 
+        }
+        .btn:hover { 
+            background-color: #0056b3; 
+        }
+        .btn-success { 
+            background-color: #28a745; 
+        }
+        .btn-success:hover { 
+            background-color: #218838; 
+        }
+        .btn-secondary { 
+            background-color: #6c757d; 
+            border: none;
+            cursor: pointer;
+        }
+        .navigation { 
+            text-align: center; 
+            margin: 30px 0; 
+        }
+        /* Stili per le recensioni */
+        .recensioni-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .rating-stars {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .rating-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .recensioni-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .btn-review {
+            background-color: #17a2b8;
+        }
+        .btn-review:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header di autenticazione -->
+    <div class="auth-header">
+        <div class="auth-header-content">
+            <div>
+                <a href="/" class="logo">🏋️ Fitness App</a>
+            </div>
+            
+            <div class="auth-menu">
+                <!-- Menu per utenti NON autenticati -->
+                <div th:if="${!isAuthenticated}">
+                    <a href="/login" class="btn">🔐 Accedi</a>
+                    <a href="/register" class="btn btn-success">📝 Registrati</a>
+                </div>
+                
+                <!-- Menu per utenti autenticati -->
+                <div th:if="${isAuthenticated}">
+                    <span style="margin-right: 15px; color: #666;">👤 Benvenuto!</span>
+                    <a href="/allenamenti" class="btn">📋 I Miei Allenamenti</a>
+                    <!-- Link pannello admin solo per amministratori -->
+                    <a th:if="${isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary">🚪 Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenuto principale -->
+    <div class="container">
+        <div class="header">
+            <h1>🏋️ Benvenuto nell'App Fitness</h1>
+            <p>Scopri gli allenamenti consigliati o registrati per creare i tuoi!</p>
+        </div>
+        
+        <div class="navigation" th:if="${isAuthenticated}">
+            <a href="/formNewAllenamento" class="btn btn-success">➕ Crea Nuovo Allenamento</a>
+        </div>
+        
+        <h2>🌟 Allenamenti Consigliati</h2>
+        
+        <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
+            <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
+                <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
+                <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
+                <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
+                <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
+                <p th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+                
+                <!-- Sezione recensioni -->
+                <div class="recensioni-section">
+                    <div class="rating-display">
+                        <span style="font-weight: bold;">⭐ Recensioni:</span>
+                        
+                        <!-- Se ci sono recensioni, mostra la media -->
+                        <div th:if="${allenamento.numeroRecensioni > 0}">
+                            <span class="rating-stars">
+                                <span th:text="${#numbers.formatDecimal(allenamento.mediaVoti, 1, 1)}">4.5</span>⭐
+                            </span>
+                            <span class="rating-text">
+                                (<span th:text="${allenamento.numeroRecensioni}">3</span> 
+                                <span th:text="${allenamento.numeroRecensioni == 1 ? 'recensione' : 'recensioni'}">recensioni</span>)
+                            </span>
+                        </div>
+                        
+                        <!-- Se non ci sono recensioni -->
+                        <span th:if="${allenamento.numeroRecensioni == 0}" class="rating-text">
+                            Non ci sono ancora recensioni.
+                        </span>
+                    </div>
+                    
+                    <!-- Azioni per le recensioni -->
+                    <div class="recensioni-actions">
+                        <!-- Pulsante per leggere le recensioni (sempre visibile) -->
+                        <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
+                           class="btn btn-review btn-small">
+                            📖 Leggi recensioni
+                        </a>
+                        
+                        <!-- Pulsante per scrivere recensione (solo per utenti autenticati) -->
+                        <a th:if="${isAuthenticated}" 
+                           th:href="@{/allenamentoConsigliato/{id}/nuovaRecensione(id=${allenamento.id})}" 
+                           class="btn btn-success btn-small">
+                            ✍️ Scrivi recensione
+                        </a>
+                        
+                        <!-- Messaggio per utenti non autenticati -->
+                        <span th:if="${!isAuthenticated}" class="rating-text" style="font-style: italic;">
+                            Accedi per lasciare una recensione
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
+            <div class="allenamento-card">
+                <p>🔍 Non ci sono allenamenti consigliati al momento.</p>
+                <p th:if="${isAdmin}">Accedi al <a href="/adminHome" style="color: #007bff;">pannello amministratore</a> per aggiungerne!</p>
+                <p th:if="${!isAdmin and !isAuthenticated}">
+                    <a href="/register" style="color: #007bff;">Registrati</a> per iniziare il tuo percorso fitness!
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

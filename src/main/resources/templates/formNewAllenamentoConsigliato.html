@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nuovo Allenamento Consigliato - Admin</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f8f9fa; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .header { 
+            background-color: #dc3545; 
+            color: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .form-container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #333; 
+        }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+        }
+        textarea { 
+            height: 100px; 
+            resize: vertical; 
+        }
+        .btn { 
+            background-color: #dc3545; 
+            color: white; 
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin: 10px 5px; 
+        }
+        .btn:hover { 
+            background-color: #c82333; 
+        }
+        .btn-secondary { 
+            background-color: #6c757d; 
+        }
+        .btn-secondary:hover { 
+            background-color: #545b62; 
+        }
+        .navigation { 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>➕ Nuovo Allenamento Consigliato</h1>
+            <p>Crea un nuovo allenamento da mostrare nella home page</p>
+        </div>
+        
+        <div class="form-container">
+            <form th:action="@{/adminHome}" th:object="${allenamento}" method="post">
+                
+                <div class="form-group">
+                    <label for="nome">🏷️ Nome Allenamento:</label>
+                    <input type="text" id="nome" th:field="*{nome}" required 
+                           placeholder="Es: Cardio per Principianti">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoSport">🏃 Tipo di Sport:</label>
+                    <select id="tipoSport" th:field="*{tipoSport}" required>
+                        <option value="">Seleziona un tipo di sport</option>
+                        <option value="Cardio">Cardio</option>
+                        <option value="Forza">Forza</option>
+                        <option value="Yoga">Yoga</option>
+                        <option value="Pilates">Pilates</option>
+                        <option value="Nuoto">Nuoto</option>
+                        <option value="Corsa">Corsa</option>
+                        <option value="Ciclismo">Ciclismo</option>
+                        <option value="Crossfit">Crossfit</option>
+                        <option value="Boxe">Boxe</option>
+                        <option value="Altro">Altro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="durata">⏱️ Durata:</label>
+                    <input type="time" id="durata" th:field="*{durata}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="livelloDifficolta">📊 Livello di Difficoltà:</label>
+                    <select id="livelloDifficolta" th:field="*{livelloDifficolta}" required>
+                        <option value="">Seleziona il livello</option>
+                        <option value="Principiante">Principiante</option>
+                        <option value="Intermedio">Intermedio</option>
+                        <option value="Avanzato">Avanzato</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descrizione">📝 Descrizione:</label>
+                    <textarea id="descrizione" th:field="*{descrizione}" 
+                              placeholder="Descrivi l'allenamento consigliato..."></textarea>
+                </div>
+                
+                <div class="navigation">
+                    <button type="submit" class="btn">💾 Salva Allenamento Consigliato</button>
+                    <a href="/adminHome" class="btn btn-secondary">❌ Annulla</a>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</body>
+</html>
