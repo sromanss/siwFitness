@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Nuova Recensione - Fitness App</title>
     <style>
+        /* Mantieni tutti gli stili esistenti */
         body { 
             font-family: Arial, sans-serif; 
             margin: 0; 
@@ -50,101 +51,110 @@
             text-align: center; 
             margin-bottom: 30px; 
         }
-        .form-container { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-        }
         .allenamento-info {
-            background-color: #f8f9fa;
-            padding: 15px;
+            background: white;
+            padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
             margin-bottom: 20px;
-            border-left: 4px solid #28a745;
         }
-        .form-group { 
-            margin-bottom: 20px; 
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
         }
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
-            color: #333; 
-        }
-        input, select, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #ddd; 
-            border-radius: 5px; 
-            font-size: 16px; 
-            box-sizing: border-box; 
-        }
-        textarea { 
-            height: 120px; 
-            resize: vertical; 
-        }
-        .rating-input {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .rating-input input[type="radio"] {
-            width: auto;
-            margin: 0;
-        }
-        .rating-label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        .rating-label:hover {
-            background-color: #f8f9fa;
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
         }
         .btn { 
-            background-color: #28a745; 
+            background-color: #007bff; 
             color: white; 
-            padding: 12px 30px; 
-            border: none; 
+            padding: 12px 24px; 
+            text-decoration: none; 
             border-radius: 5px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            margin: 10px 5px; 
+            display: inline-block; 
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
         }
         .btn:hover { 
+            background-color: #0056b3; 
+        }
+        .btn-success { 
+            background-color: #28a745; 
+        }
+        .btn-success:hover { 
             background-color: #218838; 
         }
         .btn-secondary { 
             background-color: #6c757d; 
         }
         .btn-secondary:hover { 
-            background-color: #545b62; 
+            background-color: #5a6268; 
         }
-        .navigation { 
-            text-align: center; 
-            margin: 20px 0; 
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
-        .error { 
-            color: #dc3545; 
-            font-size: 14px; 
-            margin-top: 5px; 
+        .rating-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .char-counter {
-            font-size: 12px;
-            color: #666;
-            text-align: right;
-            margin-top: 5px;
+        .rating-stars {
+            font-size: 24px;
+            color: #ffc107;
         }
     </style>
 </head>
@@ -157,15 +167,15 @@
             </div>
             
             <div class="auth-menu">
-                <div th:if="${!isAuthenticated}">
+                <div th:if="${isAuthenticated == null or !isAuthenticated}">
                     <a href="/login" class="btn">🔐 Accedi</a>
                     <a href="/register" class="btn btn-success">📝 Registrati</a>
                 </div>
                 
-                <div th:if="${isAuthenticated}">
+                <div th:if="${isAuthenticated != null and isAuthenticated}">
                     <span style="margin-right: 15px; color: #666;">👤 Benvenuto!</span>
                     <a href="/allenamenti" class="btn">📋 I Miei Allenamenti</a>
-                    <a th:if="${isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
+                    <a th:if="${isAdmin != null and isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-secondary">🚪 Logout</button>
                     </form>
@@ -181,93 +191,120 @@
         </div>
         
         <!-- Informazioni allenamento -->
-        <div class="allenamento-info">
-            <h4>📋 Stai recensendo:</h4>
-            <p><strong th:text="${allenamento.nome}">Nome Allenamento</strong></p>
-            <p><small th:text="${allenamento.tipoSport + ' - ' + allenamento.livelloDifficolta}">Cardio - Principiante</small></p>
+        <div th:if="${allenamento != null}" class="allenamento-info">
+            <h3 th:text="${allenamento?.nome ?: 'Nome Allenamento'}">Nome Allenamento</h3>
+            <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento?.tipoSport ?: 'Non specificato'}">Tipo Sport</span></p>
+            <p th:if="${allenamento?.durata != null}">
+                <strong>⏱️ Durata:</strong> 
+                <span th:text="${#temporals.format(allenamento.durata, 'HH:mm')}">Durata</span>
+            </p>
+            <p><strong>📊 Livello:</strong> <span th:text="${allenamento?.livelloDifficolta ?: 'Non specificato'}">Livello</span></p>
         </div>
         
+        <!-- Form per nuova recensione -->
         <div class="form-container">
             <!-- Messaggio di errore -->
-            <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
-                Messaggio di errore
+            <div th:if="${errorMessage != null}" class="error-message">
+                <span th:text="${errorMessage}"></span>
             </div>
             
-            <form th:action="@{/allenamentoConsigliato/{id}/recensione(id=${allenamento.id})}" 
-                  th:object="${recensione}" method="post">
+            <form th:if="${allenamento != null}" 
+                  th:action="@{/allenamentoConsigliato/{id}/recensione(id=${allenamento.id})}" 
+                  method="POST" 
+                  th:object="${recensione}">
                 
+                <!-- Campo valutazione -->
                 <div class="form-group">
                     <label for="voto">⭐ Valutazione:</label>
-                    <div class="rating-input">
-                        <label class="rating-label">
-                            <input type="radio" th:field="*{voto}" value="1" required>
-                            <span>1⭐ Pessimo</span>
-                        </label>
-                        <label class="rating-label">
-                            <input type="radio" th:field="*{voto}" value="2" required>
-                            <span>2⭐ Scarso</span>
-                        </label>
-                        <label class="rating-label">
-                            <input type="radio" th:field="*{voto}" value="3" required>
-                            <span>3⭐ Buono</span>
-                        </label>
-                        <label class="rating-label">
-                            <input type="radio" th:field="*{voto}" value="4" required>
-                            <span>4⭐ Ottimo</span>
-                        </label>
-                        <label class="rating-label">
-                            <input type="radio" th:field="*{voto}" value="5" required>
-                            <span>5⭐ Eccellente</span>
-                        </label>
+                    <select th:field="*{voto}" id="voto" required onchange="updateRatingPreview(this.value)">
+                        <option value="">Seleziona una valutazione</option>
+                        <option value="1">1 ⭐ - Pessimo</option>
+                        <option value="2">2 ⭐⭐ - Scarso</option>
+                        <option value="3">3 ⭐⭐⭐ - Sufficiente</option>
+                        <option value="4">4 ⭐⭐⭐⭐ - Buono</option>
+                        <option value="5">5 ⭐⭐⭐⭐⭐ - Eccellente</option>
+                    </select>
+                    <div class="rating-preview" id="ratingPreview" style="display: none;">
+                        <span>Anteprima:</span>
+                        <span class="rating-stars" id="ratingStars"></span>
+                        <span id="ratingText"></span>
                     </div>
-                    <span th:if="${#fields.hasErrors('voto')}" 
-                          th:errors="*{voto}" 
-                          class="error">
-                    </span>
+                    <span th:if="${#fields.hasErrors('voto')}" th:errors="*{voto}" class="error"></span>
                 </div>
                 
+                <!-- Campo testo recensione -->
                 <div class="form-group">
                     <label for="testo">💬 La tua recensione:</label>
-                    <textarea id="testo" 
-                              th:field="*{testo}" 
-                              required 
-                              maxlength="500"
-                              placeholder="Descrivi la tua esperienza con questo allenamento. Cosa ti è piaciuto? Cosa consiglieresti ad altri?"
+                    <textarea th:field="*{testo}" 
+                              id="testo" 
+                              rows="6" 
+                              maxlength="500" 
+                              placeholder="Scrivi qui la tua recensione... Cosa ti è piaciuto di questo allenamento? Cosa consiglieresti ad altri utenti?"
+                              required
                               oninput="updateCharCounter(this)"></textarea>
                     <div class="char-counter">
                         <span id="charCount">0</span>/500 caratteri
                     </div>
-                    <span th:if="${#fields.hasErrors('testo')}" 
-                          th:errors="*{testo}" 
-                          class="error">
-                    </span>
+                    <small>Descrivi la tua esperienza con questo allenamento. Sii onesto e costruttivo!</small>
+                    <span th:if="${#fields.hasErrors('testo')}" th:errors="*{testo}" class="error"></span>
                 </div>
                 
-                <div class="navigation">
-                    <button type="submit" class="btn">💾 Pubblica Recensione</button>
-                    <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
+                <!-- Pulsanti azione -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">💾 Pubblica Recensione</button>
+                    <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento?.id})}" 
                        class="btn btn-secondary">❌ Annulla</a>
                 </div>
-                
             </form>
+        </div>
+        
+        <!-- Link di navigazione -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="btn btn-secondary">🏠 Torna alla Home</a>
         </div>
     </div>
 
     <script>
+        // Funzione per aggiornare l'anteprima della valutazione
+        function updateRatingPreview(rating) {
+            const preview = document.getElementById('ratingPreview');
+            const stars = document.getElementById('ratingStars');
+            const text = document.getElementById('ratingText');
+            
+            if (rating && rating > 0) {
+                preview.style.display = 'flex';
+                stars.textContent = '⭐'.repeat(parseInt(rating));
+                
+                const ratingTexts = {
+                    '1': 'Pessimo',
+                    '2': 'Scarso', 
+                    '3': 'Sufficiente',
+                    '4': 'Buono',
+                    '5': 'Eccellente'
+                };
+                text.textContent = `(${rating}/5 - ${ratingTexts[rating]})`;
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+        
+        // Funzione per aggiornare il contatore caratteri
         function updateCharCounter(textarea) {
             const charCount = document.getElementById('charCount');
-            charCount.textContent = textarea.value.length;
+            const currentLength = textarea.value.length;
+            charCount.textContent = currentLength;
             
-            if (textarea.value.length > 450) {
+            // Cambia colore se si avvicina al limite
+            if (currentLength > 450) {
                 charCount.style.color = '#dc3545';
-            } else if (textarea.value.length > 400) {
+            } else if (currentLength > 400) {
                 charCount.style.color = '#ffc107';
             } else {
                 charCount.style.color = '#666';
             }
         }
         
-        // Inizializza il contatore al caricamento della pagina
+        // Inizializza il contatore caratteri al caricamento della pagina
         document.addEventListener('DOMContentLoaded', function() {
             const textarea = document.getElementById('testo');
             if (textarea) {

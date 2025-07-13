@@ -28,14 +28,33 @@ public class AllenamentoConsigliato {
     @Column(nullable = false)
     private String livelloDifficolta;
     
-    private String urlImmagine;
+    private String nomeImmagine; // Nome del file immagine salvato
+    private String pathImmagine; // Path completo dell'immagine
+    
     
     @OneToMany(mappedBy = "allenamentoConsigliato", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Recensione> recensioni = new ArrayList<>();
+    
 
     // Metodi helper per gestire le recensioni
     public List<Recensione> getRecensioni() { 
         return recensioni; 
+    }
+
+    public String getNomeImmagine() {
+        return nomeImmagine;
+    }
+    
+    public void setNomeImmagine(String nomeImmagine) {
+        this.nomeImmagine = nomeImmagine;
+    }
+    
+    public String getPathImmagine() {
+        return pathImmagine;
+    }
+    
+    public void setPathImmagine(String pathImmagine) {
+        this.pathImmagine = pathImmagine;
     }
 
     public void setRecensioni(List<Recensione> recensioni) { 
@@ -90,9 +109,7 @@ public class AllenamentoConsigliato {
     
     public String getLivelloDifficolta() { return livelloDifficolta; }
     public void setLivelloDifficolta(String livelloDifficolta) { this.livelloDifficolta = livelloDifficolta; }
-    
-    public String getUrlImmagine() { return urlImmagine; }
-    public void setUrlImmagine(String urlImmagine) { this.urlImmagine = urlImmagine; }
+
     
     // equals e hashCode
     @Override

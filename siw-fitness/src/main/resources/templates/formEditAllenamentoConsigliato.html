@@ -23,10 +23,15 @@
         <div class="header">
             <h1>✏️ Modifica Allenamento Consigliato</h1>
             <p th:text="'Modifica: ' + ${allenamento.nome}">Modifica allenamento consigliato</p>
+			
+			<!-- Messaggio errore immagine -->
+			<div th:if="${errorImmagine}">
+			   	<span th:text="${errorImmagine}"></span>
+			</div>
         </div>
         
         <div class="form-container">
-            <form th:action="@{/adminHome/{id}(id=${allenamento.id})}" th:object="${allenamento}" method="post">
+            <form th:action="@{/adminHome/{id}(id=${allenamento.id})}" th:object="${allenamento}" method="post" enctype="multipart/form-data" >
                 
                 <div class="form-group">
                     <label for="nome">🏷️ Nome Allenamento:</label>
@@ -69,6 +74,25 @@
                     <label for="descrizione">📝 Descrizione:</label>
                     <textarea id="descrizione" th:field="*{descrizione}"></textarea>
                 </div>
+				<!-- GESTIONE IMMAGINE ESISTENTE E NUOVA -->
+				<div>
+				   	<label>🖼️ Immagine Allenamento:</label>
+				                
+				   	<!-- Mostra immagine esistente se presente -->
+				    <div th:if="${allenamento.pathImmagine}">
+		               <p><strong>Immagine attuale:</strong></p>
+				       <img th:src="${allenamento.pathImmagine}" 
+				            th:alt="${allenamento.nome}" 
+				            width="200" />
+				    </div>
+				                
+				    <!-- Campo per caricare nuova immagine -->
+				    <div>
+				        <label>Carica nuova immagine (opzionale):</label>
+				        <input type="file" name="immagineFile" accept="image/*" />
+				        <small>Formati supportati: JPG, JPEG, PNG (max 10MB). Lascia vuoto per mantenere l'immagine attuale</small>
+				    </div>
+				</div>
                 
                 <div class="navigation">
                     <button type="submit" class="btn">💾 Salva Modifiche</button>

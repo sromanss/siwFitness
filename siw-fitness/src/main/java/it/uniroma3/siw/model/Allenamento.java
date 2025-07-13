@@ -14,7 +14,7 @@ public class Allenamento {
     private Long id;
     
     @NotBlank(message = "Il nome è obbligatorio")
-    @Size(min = 2, max = 100, message = "Il nome deve essere tra 2 e 100 caratteri")
+    @Size(min = 1, max = 100, message = "Il nome deve essere tra 1 e 100 caratteri")
     private String nome;
     
     @NotBlank(message = "Il tipo di sport è obbligatorio")
@@ -29,9 +29,6 @@ public class Allenamento {
     
     @Size(max = 1000, message = "La descrizione non può superare i 1000 caratteri")
     private String descrizione;
-    
-    @NotBlank(message = "Il livello di difficoltà è obbligatorio")
-    private String livelloDifficolta;
     
     @ManyToOne
     private User utente;
@@ -57,9 +54,6 @@ public class Allenamento {
     
     public String getDescrizione() { return descrizione; }
     public void setDescrizione(String descrizione) { this.descrizione = descrizione; }
-    
-    public String getLivelloDifficolta() { return livelloDifficolta; }
-    public void setLivelloDifficolta(String livelloDifficolta) { this.livelloDifficolta = livelloDifficolta; }
     
     public User getUtente() { return utente; }
     public void setUtente(User utente) { this.utente = utente; }

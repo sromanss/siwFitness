@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recensione - Fitness App</title>
+    <style>
+        /* Mantieni tutti gli stili esistenti */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8f9fa; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .auth-header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            border-bottom: 2px solid #007bff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .auth-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .auth-menu a {
+            margin-left: 10px;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .header { 
+            background-color: #17a2b8; 
+            color: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .allenamento-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .recensione-card { 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 30px; 
+            margin: 20px 0; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
+        }
+        .recensione-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        .recensione-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .user-info h4 {
+            margin: 0;
+            color: #333;
+        }
+        .user-info p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .recensione-rating {
+            text-align: center;
+        }
+        .rating-stars {
+            color: #ffc107;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .rating-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .recensione-content {
+            margin: 25px 0;
+        }
+        .recensione-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #17a2b8;
+        }
+        .recensione-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .recensione-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            display: inline-block; 
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover { 
+            background-color: #0056b3; 
+        }
+        .btn-success { 
+            background-color: #28a745; 
+        }
+        .btn-success:hover { 
+            background-color: #218838; 
+        }
+        .btn-warning { 
+            background-color: #ffc107; 
+            color: #212529; 
+        }
+        .btn-warning:hover { 
+            background-color: #e0a800; 
+        }
+        .btn-danger { 
+            background-color: #dc3545; 
+        }
+        .btn-danger:hover { 
+            background-color: #c82333; 
+        }
+        .btn-secondary { 
+            background-color: #6c757d; 
+        }
+        .btn-secondary:hover { 
+            background-color: #5a6268; 
+        }
+        .navigation { 
+            text-align: center; 
+            margin: 30px 0; 
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header di autenticazione -->
+    <div class="auth-header">
+        <div class="auth-header-content">
+            <div>
+                <a href="/" class="logo">🏋️ Fitness App</a>
+            </div>
+            
+            <div class="auth-menu">
+                <div th:if="${isAuthenticated == null or !isAuthenticated}">
+                    <a href="/login" class="btn">🔐 Accedi</a>
+                    <a href="/register" class="btn btn-success">📝 Registrati</a>
+                </div>
+                
+                <div th:if="${isAuthenticated != null and isAuthenticated}">
+                    <span style="margin-right: 15px; color: #666;">👤 Benvenuto!</span>
+                    <a href="/allenamenti" class="btn">📋 I Miei Allenamenti</a>
+                    <a th:if="${isAdmin != null and isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary">🚪 Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>📝 Recensione</h1>
+            <p>Dettagli della recensione per l'allenamento</p>
+        </div>
+        
+        <!-- Messaggio di successo -->
+        <div th:if="${successMessage != null}" class="success-message">
+            <span th:text="${successMessage}"></span>
+        </div>
+        
+        <!-- Informazioni allenamento -->
+        <div th:if="${allenamento != null}" class="allenamento-info">
+            <h3 th:text="${allenamento?.nome ?: 'Nome Allenamento'}">Nome Allenamento</h3>
+            <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento?.tipoSport ?: 'Non specificato'}">Tipo Sport</span></p>
+            <p th:if="${allenamento?.durata != null}">
+                <strong>⏱️ Durata:</strong> 
+                <span th:text="${#temporals.format(allenamento.durata, 'HH:mm')}">Durata</span>
+            </p>
+            <p><strong>📊 Livello:</strong> <span th:text="${allenamento?.livelloDifficolta ?: 'Non specificato'}">Livello</span></p>
+            <p th:if="${allenamento?.descrizione != null}" th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+        </div>
+        
+        <!-- Recensione dettagliata -->
+        <div th:if="${recensione != null}" class="recensione-card">
+            <div class="recensione-header">
+                <div class="recensione-user">
+                    <div class="user-avatar">
+                        <span th:text="${recensione?.utente?.nome != null and recensione?.utente?.cognome != null ? 
+                                         #strings.substring(recensione.utente.nome, 0, 1) + #strings.substring(recensione.utente.cognome, 0, 1) : 'U'}">U</span>
+                    </div>
+                    <div class="user-info">
+                        <h4 th:text="${recensione?.utente?.nome != null and recensione?.utente?.cognome != null ? 
+                                       recensione.utente.nome + ' ' + recensione.utente.cognome : 'Nome Utente'}">Nome Utente</h4>
+                        <p>Membro della community</p>
+                    </div>
+                </div>
+                
+                <div class="recensione-rating">
+                    <div class="rating-stars" th:if="${recensione?.voto != null}">
+                        <span th:text="${'⭐'.repeat(recensione.voto)}">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="rating-text">
+                        <span th:text="${recensione?.voto != null ? recensione.voto + '/5' : 'Voto non disponibile'}">5/5</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenuto della recensione -->
+            <div class="recensione-content">
+                <div class="recensione-text">
+                    <p th:text="${recensione?.testo ?: 'Testo non disponibile'}">Testo della recensione dettagliata...</p>
+                </div>
+            </div>
+            
+            <!-- Meta informazioni -->
+            <div class="recensione-meta" th:if="${recensione?.dataCreazione != null}">
+                <span>📅 Pubblicata il: <span th:text="${#temporals.format(recensione.dataCreazione, 'dd/MM/yyyy')}">01/01/2024</span></span>
+                <span>🕒 Alle ore: <span th:text="${#temporals.format(recensione.dataCreazione, 'HH:mm')}">10:30</span></span>
+            </div>
+            
+            <!-- Azioni per la propria recensione -->
+            <div th:if="${isAuthenticated != null and isAuthenticated and isOwnReview != null and isOwnReview and recensione?.id != null}" class="recensione-actions">
+                <a th:href="@{/recensione/{id}/edit(id=${recensione.id})}" 
+                   class="btn btn-warning">
+                    ✏️ Modifica Recensione
+                </a>
+                <form th:action="@{/recensione/{id}/delete(id=${recensione.id})}" 
+                      method="post" 
+                      style="display: inline;"
+                      onsubmit="return confirm('Sei sicuro di voler eliminare questa recensione? Questa azione non può essere annullata.')">
+                    <button type="submit" class="btn btn-danger">🗑️ Elimina Recensione</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Navigazione -->
+        <div class="navigation">
+            <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento?.id})}" 
+               class="btn">📖 Tutte le Recensioni</a>
+            <a href="/" class="btn btn-secondary">🏠 Torna alla Home</a>
+            
+            <!-- Pulsante per scrivere recensione se non l'ha già fatto -->
+            <div th:if="${isAuthenticated != null and isAuthenticated and (hasReviewed == null or !hasReviewed) and allenamento != null}">
+                <a th:href="@{/allenamentoConsigliato/{id}/nuovaRecensione(id=${allenamento.id})}" 
+                   class="btn btn-success">
+                    ✍️ Scrivi anche tu una recensione
+                </a>
+            </div>
+        </div>
+        
+        <!-- Altre recensioni correlate -->
+        <div th:if="${altreRecensioni != null and !altreRecensioni.isEmpty()}">
+            <h3>💬 Altre Recensioni per questo Allenamento</h3>
+            <div th:each="altra : ${altreRecensioni}" th:if="${altra != null}" style="margin-bottom: 15px;">
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong th:text="${altra?.utente?.nome != null and altra?.utente?.cognome != null ? 
+                                         altra.utente.nome + ' ' + altra.utente.cognome : 'Nome Utente'}">Nome Utente</strong>
+                        <span style="color: #ffc107;" th:text="${altra?.voto != null ? '⭐'.repeat(altra.voto) : '⭐'}">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <p th:text="${altra?.testo != null ? #strings.abbreviate(altra.testo, 100) : 'Testo non disponibile'}" style="margin: 10px 0 0 0; color: #666;">Anteprima recensione...</p>
+                    <a th:if="${altra?.id != null}" th:href="@{/recensione/{id}(id=${altra.id})}" style="color: #007bff; font-size: 14px;">Leggi recensione completa →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -194,8 +194,8 @@
                 <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
                 <p><strong>📅 Data:</strong> <span th:text="${allenamento.data}">Data</span></p>
                 <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
-                <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
-                
+                <!-- <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
+                -->
                 <div class="actions">
                     <a th:href="@{/allenamento/{id}(id=${allenamento.id})}" class="btn">👁️ Visualizza</a>
                     <a th:href="@{/allenamento/{id}/edit(id=${allenamento.id})}" class="btn btn-warning">✏️ Modifica</a>
@@ -211,7 +211,7 @@
         
         <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
             <div class="allenamento-card">
-                <p>🔍 Non hai ancora creato nessun allenamento.</p>
+                <p>🔍 Non ci sono allenamenti creati per questo tipo di sport!</p>
                 <p>Inizia creando il tuo primo allenamento!</p>
                 <a href="/formNewAllenamento" class="btn btn-success">➕ Crea il tuo primo allenamento</a>
             </div>

@@ -113,16 +113,30 @@
             <a href="/adminHome/new" class="btn btn-success">➕ Nuovo Allenamento Consigliato</a>
         </div>
         
-        <h2>🌟 Allenamenti Consigliati</h2>
-        
-        <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
-            <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
-                <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
-                <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
-                <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
-                <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
-                <p th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+		<h2>🌟 Allenamenti Consigliati</h2>
+
+				<div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
+				    <div th:each="allenamento : ${allenamenti}" class="allenamento-card" 
+				         style="display: flex; gap: 20px; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fff;">
+				        
+				        <!-- INFORMAZIONI ALLENAMENTO A SINISTRA -->
+				        <div style="flex: 1;">
+				            <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
+				            <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
+				            <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
+				            <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
+				            <p th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+				        </div>
+				        
+				        <!-- IMMAGINE A DESTRA (solo se presente) -->
+				        <div th:if="${allenamento.pathImmagine}" style="flex-shrink: 0;">
+				            <img th:src="${allenamento.pathImmagine}" 
+				                 th:alt="${allenamento.nome}" 
+				                 style="width: 300px; height: 200px; object-fit: cover; border-radius: 8px;" />
+				        </div>
                 
+				<!-- INFORMAZIONI ALLENAMENTO -->
+				
                 <div class="actions">
                     <a th:href="@{/adminHome/{id}/edit(id=${allenamento.id})}" class="btn btn-warning">✏️ Modifica</a>
                     <form th:action="@{/adminHome/{id}/delete(id=${allenamento.id})}" 

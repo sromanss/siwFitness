@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Fitness App - Home</title>
     <style>
+        /* Mantieni tutti gli stili esistenti */
         body { 
             font-family: Arial, sans-serif; 
             margin: 0; 
@@ -85,7 +86,6 @@
             text-align: center; 
             margin: 30px 0; 
         }
-        /* Stili per le recensioni */
         .recensioni-section {
             margin-top: 15px;
             padding-top: 15px;
@@ -132,17 +132,17 @@
             
             <div class="auth-menu">
                 <!-- Menu per utenti NON autenticati -->
-                <div th:if="${!isAuthenticated}">
+                <div th:if="${isAuthenticated == null or !isAuthenticated}">
                     <a href="/login" class="btn">🔐 Accedi</a>
                     <a href="/register" class="btn btn-success">📝 Registrati</a>
                 </div>
                 
                 <!-- Menu per utenti autenticati -->
-                <div th:if="${isAuthenticated}">
+                <div th:if="${isAuthenticated != null and isAuthenticated}">
                     <span style="margin-right: 15px; color: #666;">👤 Benvenuto!</span>
                     <a href="/allenamenti" class="btn">📋 I Miei Allenamenti</a>
                     <!-- Link pannello admin solo per amministratori -->
-                    <a th:if="${isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
+                    <a th:if="${isAdmin != null and isAdmin}" href="/adminHome" class="btn" style="background-color: #dc3545;">🔧 Pannello Admin</a>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-secondary">🚪 Logout</button>
                     </form>
@@ -158,29 +158,47 @@
             <p>Scopri gli allenamenti consigliati o registrati per creare i tuoi!</p>
         </div>
         
-        <div class="navigation" th:if="${isAuthenticated}">
+        <div class="navigation" th:if="${isAuthenticated != null and isAuthenticated}">
             <a href="/formNewAllenamento" class="btn btn-success">➕ Crea Nuovo Allenamento</a>
         </div>
         
         <h2>🌟 Allenamenti Consigliati</h2>
-        
+
         <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
-            <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
-                <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
-                <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
-                <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
-                <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
-                <p th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+            <div th:each="allenamento : ${allenamenti}" th:if="${allenamento != null}" class="allenamento-card">
                 
-                <!-- Sezione recensioni -->
+                <!-- Layout principale con informazioni e immagine -->
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    
+                    <!-- INFORMAZIONI ALLENAMENTO A SINISTRA -->
+                    <div style="flex: 1;">
+                        <h3 th:text="${allenamento?.nome ?: 'Nome Allenamento'}">Nome Allenamento</h3>
+                        <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento?.tipoSport ?: 'Non specificato'}">Tipo Sport</span></p>
+                        <p th:if="${allenamento?.durata != null}">
+                            <strong>⏱️ Durata:</strong> 
+                            <span th:text="${#temporals.format(allenamento.durata, 'HH:mm')}">Durata</span>
+                        </p>
+                        <p><strong>📊 Livello:</strong> <span th:text="${allenamento?.livelloDifficolta ?: 'Non specificato'}">Livello</span></p>
+                        <p th:if="${allenamento?.descrizione != null}" th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+                    </div>
+                    
+                    <!-- IMMAGINE A DESTRA (solo se presente) -->
+                    <div th:if="${allenamento?.pathImmagine != null}" style="flex-shrink: 0;">
+                        <img th:src="${allenamento.pathImmagine}" 
+                             th:alt="${allenamento?.nome ?: 'Allenamento'}" 
+                             style="width: 300px; height: 200px; object-fit: cover; border-radius: 8px;" />
+                    </div>
+                </div>
+
+                <!-- SEZIONE RECENSIONI SEPARATA (FUORI DAL FLEX) -->
                 <div class="recensioni-section">
                     <div class="rating-display">
                         <span style="font-weight: bold;">⭐ Recensioni:</span>
                         
                         <!-- Se ci sono recensioni, mostra la media -->
-                        <div th:if="${allenamento.numeroRecensioni > 0}">
+                        <div th:if="${allenamento?.numeroRecensioni != null and allenamento.numeroRecensioni > 0}">
                             <span class="rating-stars">
-                                <span th:text="${#numbers.formatDecimal(allenamento.mediaVoti, 1, 1)}">4.5</span>⭐
+                                <span th:text="${allenamento?.mediaVoti != null ? #numbers.formatDecimal(allenamento.mediaVoti, 1, 1) : '0.0'}">4.5</span>⭐
                             </span>
                             <span class="rating-text">
                                 (<span th:text="${allenamento.numeroRecensioni}">3</span> 
@@ -189,7 +207,7 @@
                         </div>
                         
                         <!-- Se non ci sono recensioni -->
-                        <span th:if="${allenamento.numeroRecensioni == 0}" class="rating-text">
+                        <span th:if="${allenamento?.numeroRecensioni == null or allenamento.numeroRecensioni == 0}" class="rating-text">
                             Non ci sono ancora recensioni.
                         </span>
                     </div>
@@ -197,20 +215,21 @@
                     <!-- Azioni per le recensioni -->
                     <div class="recensioni-actions">
                         <!-- Pulsante per leggere le recensioni (sempre visibile) -->
-                        <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
+                        <a th:if="${allenamento?.id != null}" 
+                           th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
                            class="btn btn-review btn-small">
                             📖 Leggi recensioni
                         </a>
                         
                         <!-- Pulsante per scrivere recensione (solo per utenti autenticati) -->
-                        <a th:if="${isAuthenticated}" 
+                        <a th:if="${isAuthenticated != null and isAuthenticated and allenamento?.id != null}" 
                            th:href="@{/allenamentoConsigliato/{id}/nuovaRecensione(id=${allenamento.id})}" 
                            class="btn btn-success btn-small">
                             ✍️ Scrivi recensione
                         </a>
                         
                         <!-- Messaggio per utenti non autenticati -->
-                        <span th:if="${!isAuthenticated}" class="rating-text" style="font-style: italic;">
+                        <span th:if="${isAuthenticated == null or !isAuthenticated}" class="rating-text" style="font-style: italic;">
                             Accedi per lasciare una recensione
                         </span>
                     </div>
@@ -221,8 +240,8 @@
         <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
             <div class="allenamento-card">
                 <p>🔍 Non ci sono allenamenti consigliati al momento.</p>
-                <p th:if="${isAdmin}">Accedi al <a href="/adminHome" style="color: #007bff;">pannello amministratore</a> per aggiungerne!</p>
-                <p th:if="${!isAdmin and !isAuthenticated}">
+                <p th:if="${isAdmin != null and isAdmin}">Accedi al <a href="/adminHome" style="color: #007bff;">pannello amministratore</a> per aggiungerne!</p>
+                <p th:if="${(isAdmin == null or !isAdmin) and (isAuthenticated == null or !isAuthenticated)}">
                     <a href="/register" style="color: #007bff;">Registrati</a> per iniziare il tuo percorso fitness!
                 </p>
             </div>

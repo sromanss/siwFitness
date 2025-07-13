@@ -5,58 +5,62 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "recensioni")
 public class Recensione {
-    
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @NotBlank(message = "Il testo della recensione è obbligatorio")
-    @Size(max = 500, message = "La recensione non può superare i 500 caratteri")
-    private String testo;
-    
-    @NotNull(message = "Il voto è obbligatorio")
-    @Min(value = 1, message = "Il voto minimo è 1")
-    @Max(value = 5, message = "Il voto massimo è 5")
-    private Integer voto;
-    
+
     @NotNull
+    @Min(1)
+    @Max(5)
+    private Integer voto;
+
+    @NotBlank
+    @Size(min = 1, max = 500)
+    private String testo;
+
+    @Column(nullable = false)
     private LocalDateTime dataCreazione;
     
-    @ManyToOne
-    @JoinColumn(name = "utente_id")
+    private LocalDateTime dataModifica;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "utente_id", nullable = false)
     private User utente;
-    
-    @ManyToOne
-    @JoinColumn(name = "allenamento_consigliato_id")
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "allenamento_id", nullable = false)
     private AllenamentoConsigliato allenamentoConsigliato;
-    
+
     // Costruttori
     public Recensione() {
         this.dataCreazione = LocalDateTime.now();
     }
-    
+
     // Getter e Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    
-    public String getTesto() { return testo; }
-    public void setTesto(String testo) { this.testo = testo; }
-    
+
     public Integer getVoto() { return voto; }
     public void setVoto(Integer voto) { this.voto = voto; }
-    
+
+    public String getTesto() { return testo; }
+    public void setTesto(String testo) { this.testo = testo; }
+
     public LocalDateTime getDataCreazione() { return dataCreazione; }
     public void setDataCreazione(LocalDateTime dataCreazione) { this.dataCreazione = dataCreazione; }
-    
+
+    public LocalDateTime getDataModifica() { return dataModifica; }
+    public void setDataModifica(LocalDateTime dataModifica) { this.dataModifica = dataModifica; }
+
     public User getUtente() { return utente; }
     public void setUtente(User utente) { this.utente = utente; }
-    
+
     public AllenamentoConsigliato getAllenamentoConsigliato() { return allenamentoConsigliato; }
-    public void setAllenamentoConsigliato(AllenamentoConsigliato allenamentoConsigliato) { 
-        this.allenamentoConsigliato = allenamentoConsigliato; 
-    }
-    
+    public void setAllenamentoConsigliato(AllenamentoConsigliato allenamentoConsigliato) { this.allenamentoConsigliato = allenamentoConsigliato; }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -64,9 +68,9 @@ public class Recensione {
         Recensione that = (Recensione) obj;
         return id != null && id.equals(that.id);
     }
-    
+
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return id != null ? id.hashCode() : 0;
     }
 }
