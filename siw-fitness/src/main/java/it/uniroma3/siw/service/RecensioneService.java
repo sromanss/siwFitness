@@ -41,4 +41,17 @@ public class RecensioneService {
     public void deleteById(Long id) {
         recensioneRepository.deleteById(id);
     }
+    public boolean deleteRecensioneAsAdmin(Long recensioneId) {
+        try {
+            recensioneRepository.deleteById(recensioneId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    // **NUOVO METODO: Trova tutte le recensioni (per admin)**
+    public List<Recensione> findAll() {
+        return (List<Recensione>) recensioneRepository.findAll();
+    }
 }

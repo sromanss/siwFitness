@@ -105,13 +105,6 @@
             color: #6c757d;
             margin-top: 5px;
         }
-        .form-group input:invalid {
-            border-color: #dc3545;
-            box-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
-        }
-        .form-group input:valid {
-            border-color: #28a745;
-        }
     </style>
 </head>
 <body>
@@ -208,20 +201,6 @@
                     </span>
                 </div>
                 
-                <!-- <div class="form-group">
-                    <label for="livelloDifficolta">📊 Livello di Difficoltà:</label>
-                    <select id="livelloDifficolta" th:field="*{livelloDifficolta}" required>
-                        <option value="">Seleziona il livello</option>
-                        <option value="Principiante">Principiante</option>
-                        <option value="Intermedio">Intermedio</option>
-                        <option value="Avanzato">Avanzato</option>
-                    </select>
-                    <span th:if="${#fields.hasErrors('livelloDifficolta')}" 
-                          th:errors="*{livelloDifficolta}" 
-                          style="color: #dc3545; font-size: 14px; display: block; margin-top: 5px;">
-                    </span>
-                </div> -->
-                
                 <div class="form-group">
                     <label for="descrizione">📝 Descrizione:</label>
                     <textarea id="descrizione" th:field="*{descrizione}" 
@@ -241,5 +220,5 @@
             </form>
         </div>
     </div>
-
-    <script>
+</body>
+</html>

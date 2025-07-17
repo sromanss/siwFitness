@@ -108,12 +108,138 @@
             margin-bottom: 8px; 
             font-weight: bold; 
         }
-        select { 
+        input[type="text"] { 
             width: 100%; 
             padding: 12px; 
             border: 1px solid #ddd; 
             border-radius: 5px; 
             box-sizing: border-box; 
+        }
+        select {
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: white;
+        }
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        /* Stili per il form di ricerca esteso */
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .search-group input,
+        .search-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-search {
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        /* Layout a due colonne */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .content-area {
+            min-height: 500px;
+        }
+        
+        /* Responsive per mobile */
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-group {
+                min-width: 100%;
+            }
+            
+            .search-buttons {
+                justify-content: center;
+            }
+            
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
+            }
         }
     </style>
 </head>
@@ -155,65 +281,94 @@
             <a href="/formNewAllenamento" class="btn btn-success">➕ Nuovo Allenamento</a>
         </div>
 
-        <!-- Sezione Filtri -->
-        <div class="form-container">
-            <h3>🔍 Filtra Allenamenti</h3>
-            <form action="/allenamenti/filtro" method="get" style="display: flex; gap: 15px; align-items: end;">
-                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="tipoSport">Tipo di Sport:</label>
-                    <select name="tipoSport" id="tipoSport">
-                        <option value="">Tutti i tipi</option>
-                        <option value="Cardio">Cardio</option>
-                        <option value="Forza">Forza</option>
-                        <option value="Yoga">Yoga</option>
-                        <option value="Pilates">Pilates</option>
-                        <option value="Nuoto">Nuoto</option>
-                        <option value="Corsa">Corsa</option>
-                        <option value="Ciclismo">Ciclismo</option>
-                        <option value="Crossfit">Crossfit</option>
-                        <option value="Boxe">Boxe</option>
-                        <option value="Altro">Altro</option>
+        <!-- Form di ricerca e ordinamento esteso -->
+        <div class="search-container">
+            <form action="/allenamenti" method="get" class="search-form">
+                
+                <!-- Campo ricerca -->
+                <div class="search-group">
+                    <label for="keyword">🔍 Cerca allenamento</label>
+                    <input type="text" id="keyword" name="keyword" 
+                           placeholder="Nome allenamento o tipo sport..." 
+                           th:value="${keyword}">
+                </div>
+                
+                <!-- Campo ordinamento -->
+                <div class="search-group">
+                    <label for="sortBy">📊 Ordina per</label>
+                    <select id="sortBy" name="sortBy">
+                        <option value="">Più recenti</option>
+                        <option value="nome" th:selected="${currentSort == 'nome'}">🏷️ Nome</option>
+                        <option value="durata" th:selected="${currentSort == 'durata'}">⏱️ Durata</option>
+                        <option value="data" th:selected="${currentSort == 'data'}">📅 Data</option>
+                        <option value="tipoSport" th:selected="${currentSort == 'tipoSport'}">🏃 Tipo Sport</option>
                     </select>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <button type="submit" class="btn">🔍 Filtra</button>
-                    <a href="/allenamenti" class="btn btn-secondary">🔄 Reset</a>
+                
+                <!-- Bottoni -->
+                <div class="search-buttons">
+                    <button type="submit" class="btn btn-search">🔍 Cerca</button>
+                    <a href="/allenamenti" class="btn btn-secondary btn-search">🔄 Reset</a>
                 </div>
             </form>
         </div>
-        
-        <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
-            <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
-                <h3>
-                    <a th:href="@{/allenamento/{id}(id=${allenamento.id})}" 
-                       th:text="${allenamento.nome}" 
-                       style="text-decoration: none; color: #007bff;">
-                        Nome Allenamento
-                    </a>
-                </h3>
-                <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
-                <p><strong>📅 Data:</strong> <span th:text="${allenamento.data}">Data</span></p>
-                <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
-                <!-- <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
-                -->
-                <div class="actions">
-                    <a th:href="@{/allenamento/{id}(id=${allenamento.id})}" class="btn">👁️ Visualizza</a>
-                    <a th:href="@{/allenamento/{id}/edit(id=${allenamento.id})}" class="btn btn-warning">✏️ Modifica</a>
-                    <form th:action="@{/allenamento/{id}/delete(id=${allenamento.id})}" 
-                          method="post" 
-                          style="display: inline;"
-                          onsubmit="return confirm('Sei sicuro di voler cancellare questo allenamento?')">
-                        <button type="submit" class="btn btn-danger">🗑️ Elimina</button>
-                    </form>
+
+        <!-- Layout principale a due colonne -->
+        <div class="main-layout">
+            <!-- Sidebar solo con statistiche -->
+            <div class="sidebar">
+                <!-- Statistiche utente -->
+                <div class="form-container">
+                    <h3>📊 Le tue statistiche</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" th:text="${totaleAllenamenti}">0</div>
+                            <div>Allenamenti totali</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" th:text="${durataTotale}">0</div>
+                            <div>Minuti totali</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
-            <div class="allenamento-card">
-                <p>🔍 Non ci sono allenamenti creati per questo tipo di sport!</p>
-                <p>Inizia creando il tuo primo allenamento!</p>
-                <a href="/formNewAllenamento" class="btn btn-success">➕ Crea il tuo primo allenamento</a>
+            
+            <!-- Area contenuto principale -->
+            <div class="content-area">
+                <!-- Lista allenamenti -->
+                <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
+                    <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
+                        <h3>
+                            <a th:href="@{/allenamento/{id}(id=${allenamento.id})}" 
+                               th:text="${allenamento.nome}" 
+                               style="text-decoration: none; color: #007bff;">
+                                Nome Allenamento
+                            </a>
+                        </h3>
+                        <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
+                        <p><strong>📅 Data:</strong> <span th:text="${allenamento.data}">Data</span></p>
+                        <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
+                        <div class="actions">
+                            <a th:href="@{/allenamento/{id}(id=${allenamento.id})}" class="btn">👁️ Visualizza</a>
+                            <a th:href="@{/allenamento/{id}/edit(id=${allenamento.id})}" class="btn btn-warning">✏️ Modifica</a>
+                            <form th:action="@{/allenamento/{id}/delete(id=${allenamento.id})}" 
+                                  method="post" 
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Sei sicuro di voler cancellare questo allenamento?')">
+                                <button type="submit" class="btn btn-danger">🗑️ Elimina</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messaggio quando non ci sono allenamenti -->
+                <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
+                    <div class="allenamento-card">
+                        <p>🔍 Non ci sono allenamenti che corrispondono ai tuoi criteri di ricerca!</p>
+                        <p>Prova a cercare con una parola chiave diversa o crea un nuovo allenamento!</p>
+                        <a href="/formNewAllenamento" class="btn btn-success">➕ Crea nuovo allenamento</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

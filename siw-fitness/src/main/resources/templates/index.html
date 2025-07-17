@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Fitness App - Home</title>
     <style>
-        /* Mantieni tutti gli stili esistenti */
         body { 
             font-family: Arial, sans-serif; 
             margin: 0; 
@@ -120,6 +119,70 @@
         .btn-review:hover {
             background-color: #138496;
         }
+        
+        /* Stili per il form di ricerca */
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .search-group input,
+        .search-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-search {
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-group {
+                min-width: 100%;
+            }
+            
+            .search-buttons {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -163,6 +226,37 @@
         </div>
         
         <h2>🌟 Allenamenti Consigliati</h2>
+
+        <!-- Form di ricerca e ordinamento -->
+        <div class="search-container">
+            <form action="/" method="get" class="search-form">
+                
+                <!-- Campo ricerca -->
+                <div class="search-group">
+                    <label for="search">🔍 Cerca allenamento</label>
+                    <input type="text" id="search" name="search" 
+                           placeholder="Nome allenamento o tipo sport..." 
+                           th:value="${currentSearch}">
+                </div>
+                
+                <!-- Campo ordinamento -->
+                <div class="search-group">
+                    <label for="sortBy">📊 Ordina per</label>
+                    <select id="sortBy" name="sortBy">
+                        <option value="">Più recenti</option>
+                        <option value="durata" th:selected="${currentSort == 'durata'}">⏱️ Durata</option>
+                        <option value="numeroRecensioni" th:selected="${currentSort == 'numeroRecensioni'}">👥 Numero recensioni</option>
+                        <option value="mediaVoti" th:selected="${currentSort == 'mediaVoti'}">⭐ Valutazione media</option>
+                    </select>
+                </div>
+                
+                <!-- Bottoni -->
+                <div class="search-buttons">
+                    <button type="submit" class="btn btn-search">🔍 Cerca</button>
+                    <a href="/" class="btn btn-secondary btn-search">🔄 Reset</a>
+                </div>
+            </form>
+        </div>
 
         <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
             <div th:each="allenamento : ${allenamenti}" th:if="${allenamento != null}" class="allenamento-card">
@@ -239,7 +333,7 @@
         
         <div th:if="${allenamenti == null or allenamenti.isEmpty()}">
             <div class="allenamento-card">
-                <p>🔍 Non ci sono allenamenti consigliati al momento.</p>
+                <p>🔍 Non ci sono allenamenti che corrispondono ai criteri di ricerca.</p>
                 <p th:if="${isAdmin != null and isAdmin}">Accedi al <a href="/adminHome" style="color: #007bff;">pannello amministratore</a> per aggiungerne!</p>
                 <p th:if="${(isAdmin == null or !isAdmin) and (isAuthenticated == null or !isAuthenticated)}">
                     <a href="/register" style="color: #007bff;">Registrati</a> per iniziare il tuo percorso fitness!

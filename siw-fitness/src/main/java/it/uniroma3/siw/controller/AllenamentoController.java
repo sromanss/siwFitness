@@ -1,6 +1,7 @@
 package it.uniroma3.siw.controller;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,18 +29,34 @@ public class AllenamentoController {
     private AuthenticationService authHelper;
 
     @GetMapping("/allenamenti")
-    public String getAllenamenti(Model model) {
+    public String getAllenamenti(@RequestParam(required = false) String keyword, 
+                                @RequestParam(required = false) String sortBy,
+                                Model model) {
         User currentUser = authHelper.getCurrentUser();
 
         if (currentUser != null) {
-            model.addAttribute("allenamenti", allenamentoService.findByUtente(currentUser));
+            List<Allenamento> allenamenti;
+            
+            // Usa il nuovo metodo che gestisce sia ricerca che ordinamento
+            allenamenti = allenamentoService.findAllWithFilters(currentUser, keyword, sortBy);
+            
+            model.addAttribute("allenamenti", allenamenti);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("currentSort", sortBy);
+            
+            // Aggiunge le statistiche
+            model.addAttribute("totaleAllenamenti", allenamentoService.countByUtente(currentUser));
+            model.addAttribute("durataTotale", allenamentoService.sumDurataByUtente(currentUser));
         } else {
             model.addAttribute("allenamenti", Collections.emptyList());
+            model.addAttribute("totaleAllenamenti", 0L);
+            model.addAttribute("durataTotale", 0);
         }
 
         authHelper.addAuthenticationInfo(model);
         return "allenamenti";
     }
+
 
     @GetMapping("/allenamento/{id}")
     public String getAllenamento(@PathVariable("id") Long id, Model model) {
@@ -96,11 +113,25 @@ public class AllenamentoController {
 
     @PostMapping("/allenamento/{id}")
     public String updateAllenamento(@PathVariable("id") Long id,
-                                   @ModelAttribute("allenamento") Allenamento allenamento) {
-        allenamento.setId(id);
-        allenamentoService.save(allenamento);
-        return "redirect:/allenamento/" + id;
+                                   @ModelAttribute("allenamento") Allenamento allenamento,
+                                   Model model) {
+        // Recupera l'utente corrente
+        User currentUser = authHelper.getCurrentUser();
+        
+        if (currentUser != null) {
+            // Imposta l'ID e l'utente
+            allenamento.setId(id);
+            allenamento.setUtente(currentUser);  // ✅ SOLUZIONE: riassegna l'utente
+            
+            allenamentoService.save(allenamento);
+            return "redirect:/allenamento/" + id;
+        } else {
+            model.addAttribute("error", "Errore nell'identificazione dell'utente");
+            authHelper.addAuthenticationInfo(model);
+            return "formEditAllenamento";
+        }
     }
+
 
     @PostMapping("/allenamento/{id}/delete")
     public String deleteAllenamento(@PathVariable("id") Long id) {
@@ -108,16 +139,5 @@ public class AllenamentoController {
         return "redirect:/allenamenti";
     }
 
-    @GetMapping("/allenamenti/filtro")
-    public String getAllenamentiByTipo(@RequestParam(value = "tipoSport", required = false) String tipoSport, Model model) {
-        if (tipoSport != null && !tipoSport.isEmpty()) {
-            model.addAttribute("allenamenti", allenamentoService.findByTipoSport(tipoSport));
-            model.addAttribute("filtroAttivo", tipoSport);
-        } else {
-            model.addAttribute("allenamenti", allenamentoService.findAll());
-        }
-
-        authHelper.addAuthenticationInfo(model);
-        return "allenamenti";
-    }
+    
 }

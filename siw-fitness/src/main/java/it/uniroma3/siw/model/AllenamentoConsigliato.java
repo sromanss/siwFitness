@@ -31,11 +31,9 @@ public class AllenamentoConsigliato {
     private String nomeImmagine; // Nome del file immagine salvato
     private String pathImmagine; // Path completo dell'immagine
     
-    
     @OneToMany(mappedBy = "allenamentoConsigliato", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Recensione> recensioni = new ArrayList<>();
     
-
     // Metodi helper per gestire le recensioni
     public List<Recensione> getRecensioni() { 
         return recensioni; 
@@ -55,6 +53,17 @@ public class AllenamentoConsigliato {
     
     public void setPathImmagine(String pathImmagine) {
         this.pathImmagine = pathImmagine;
+    }
+    
+    // Metodo helper per rimuovere l'immagine
+    public void rimuoviImmagine() {
+        this.nomeImmagine = null;
+        this.pathImmagine = null;
+    }
+    
+    // Metodo per verificare se ha un'immagine
+    public boolean hasImmagine() {
+        return this.pathImmagine != null && !this.pathImmagine.trim().isEmpty();
     }
 
     public void setRecensioni(List<Recensione> recensioni) { 
@@ -87,7 +96,6 @@ public class AllenamentoConsigliato {
         return recensioni.size();
     }
 
-    
     // Costruttori
     public AllenamentoConsigliato() {}
     
@@ -110,7 +118,6 @@ public class AllenamentoConsigliato {
     public String getLivelloDifficolta() { return livelloDifficolta; }
     public void setLivelloDifficolta(String livelloDifficolta) { this.livelloDifficolta = livelloDifficolta; }
 
-    
     // equals e hashCode
     @Override
     public boolean equals(Object obj) {

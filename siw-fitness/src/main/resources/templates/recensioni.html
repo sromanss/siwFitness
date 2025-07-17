@@ -7,7 +7,6 @@
         Recensioni - Fitness App
     </title>
 
-    <!-- ===== STYLE (puoi lasciare invariato se ti piace) ===== -->
     <style>
         body {font-family: Arial, sans-serif; margin:0; padding:0; background:#f8f9fa;}
         .container {max-width: 800px; margin:0 auto; padding:20px;}
@@ -19,26 +18,56 @@
         .recensione-rating {color:#ffc107; font-weight:bold; font-size:18px;}
         .recensione-date {color:#666; font-size:12px;}
         .recensione-actions {display:flex; gap:10px; margin-top:15px;}
+        .admin-badge {background:#dc3545; color:#fff; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:bold;}
         .btn{background:#007bff; color:#fff; padding:8px 16px; border:none; border-radius:5px; text-decoration:none; cursor:pointer;}
         .btn:hover{background:#0056b3;}
         .btn-success{background:#28a745;}
         .btn-warning{background:#ffc107; color:#212529;}
         .btn-danger{background:#dc3545;}
         .btn-secondary{background:#6c757d;}
-        .navigation{text-align:center; margin:40px 0 0; border-top:1px solid #ddd; padding-top:20px;}
         .no-reviews{text-align:center; padding:40px; color:#666; font-style:italic;}
+        
+        /* NAVIGAZIONE CORRETTA */
+        .navigation {
+            text-align: center; 
+            margin: 40px 0 0; 
+            border-top: 1px solid #ddd; 
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .navigation .btn {
+            margin: 5px;
+        }
+        
+        /* Responsive per schermi piccoli */
+        @media (max-width: 600px) {
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .navigation .btn {
+                margin: 5px 0;
+                min-width: 200px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <!-- ===== HEADER DI PAGINA ===== -->
     <div class="container">
         <div class="header">
             <h1>📖 Recensioni</h1>
             <p th:text="${allenamento?.nome ?: 'Nome Allenamento'}">Nome Allenamento</p>
+            <div th:if="${isAuthenticated and isAdmin}" class="admin-badge">
+                🔧 MODALITÀ ADMIN
+            </div>
         </div>
 
-        <!-- ===== INFO ALLENAMENTO ===== -->
         <div th:if="${allenamento != null}" class="allenamento-info">
             <h3 th:text="${allenamento?.nome ?: 'Nome Allenamento'}">Nome Allenamento</h3>
             <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento?.tipoSport ?: 'Non specificato'}">Tipo Sport</span></p>
@@ -50,7 +79,6 @@
             <p th:if="${allenamento?.descrizione != null}" th:text="${allenamento.descrizione}">Descrizione</p>
         </div>
 
-        <!-- ===== RIEPILOGO VALUTAZIONI ===== -->
         <div th:if="${recensioni != null and !recensioni.isEmpty()}" class="rating-summary">
             <h3>⭐ Valutazione Media</h3>
             <div style="font-size:24px; margin:10px 0;">
@@ -62,7 +90,6 @@
             </p>
         </div>
 
-        <!-- ===== LISTA RECENSIONI ===== -->
         <h3>💬 Tutte le Recensioni</h3>
 
         <div th:if="${recensioni != null and !recensioni.isEmpty()}">
@@ -84,18 +111,23 @@
 
                 <p th:text="${recensione?.testo ?: 'Testo non disponibile'}">Testo recensione...</p>
 
-                <!-- Pulsanti per la PROPRIA recensione dentro la card -->
-                <div th:if="${isAuthenticated and userReview != null and recensione.id == userReview.id}" class="recensione-actions">
+                <div th:if="${isAuthenticated and !isAdmin and userReview != null and recensione.id == userReview.id}" class="recensione-actions">
                     <a th:href="@{/recensione/{id}/edit(id=${recensione.id})}" class="btn btn-warning">✏️ Modifica</a>
                     <form th:action="@{/recensione/{id}/delete(id=${recensione.id})}" method="post" style="display:inline;"
                           onsubmit="return confirm('Sei sicuro di voler eliminare questa recensione?')">
                         <button type="submit" class="btn btn-danger">🗑️ Elimina</button>
                     </form>
                 </div>
+
+                <div th:if="${isAuthenticated and isAdmin}" class="recensione-actions">
+                    <form th:action="@{/adminHome/recensione/{id}/delete(id=${recensione.id})}" method="post" style="display:inline;"
+                          onsubmit="return confirm('Sei sicuro di voler eliminare questa recensione come Admin? Questa azione non può essere annullata.')">
+                        <button type="submit" class="btn btn-danger">🗑️ Elimina (Admin)</button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- MESSAGGIO SE NON CI SONO RECENSIONI -->
         <div th:if="${recensioni == null or recensioni.isEmpty()}" class="no-reviews">
             <h4>📭 Nessuna recensione presente</h4>
             <p>Sii il primo a lasciare una recensione per questo allenamento!</p>
@@ -106,9 +138,13 @@
             </div>
         </div>
 
-        <!-- ===== FOOTER NAVIGATION (UNICO BLOCCO PULSANTI) ===== -->
+        <!-- NAVIGAZIONE CORRETTA -->
         <div class="navigation">
             <a href="/" class="btn btn-secondary">🏠 Torna alla Home</a>
+            <a th:if="${isAuthenticated and isAdmin}" 
+               href="/adminHome" 
+               class="btn" 
+               style="background:#dc3545;">🔧 Pannello Admin</a>
         </div>
     </div>
 </body>

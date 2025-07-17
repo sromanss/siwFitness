@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import it.uniroma3.siw.model.AllenamentoConsigliato;
+import it.uniroma3.siw.model.Recensione;
 import it.uniroma3.siw.service.AllenamentoConsigliatoService;
+import it.uniroma3.siw.service.RecensioneService;
 import it.uniroma3.siw.service.ImageService;
 import jakarta.validation.Valid;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 public class AdminController {
@@ -25,10 +28,20 @@ public class AdminController {
     
     @Autowired
     private ImageService imageService;
+    
+    @Autowired
+    private RecensioneService recensioneService;
+
+    // ========== GESTIONE ALLENAMENTI ==========
 
     @GetMapping("/adminHome")
     public String adminHome(Model model) {
         model.addAttribute("allenamenti", allenamentoConsigliatoService.findAll());
+        
+        // Aggiungi statistiche recensioni
+        List<Recensione> tutteRecensioni = recensioneService.findAll();
+        model.addAttribute("totalRecensioni", tutteRecensioni.size());
+        
         addAuthenticationStatus(model);
         return "adminHome";
     }
@@ -88,7 +101,8 @@ public class AdminController {
     @PostMapping("/adminHome/{id}")
     public String updateAllenamentoConsigliato(@PathVariable("id") Long id,
                                              @ModelAttribute("allenamento") AllenamentoConsigliato allenamento,
-                                             @RequestParam("immagineFile") MultipartFile file,
+                                             @RequestParam(value = "immagineFile", required = false) MultipartFile file,
+                                             @RequestParam(value = "rimuoviImmagine", required = false) boolean rimuoviImmagine,
                                              Model model) {
         
         AllenamentoConsigliato esistente = allenamentoConsigliatoService.findById(id);
@@ -96,8 +110,18 @@ public class AdminController {
             return "redirect:/adminHome";
         }
         
-        // Gestione upload nuova immagine
-        if (!file.isEmpty()) {
+        // GESTIONE ELIMINAZIONE IMMAGINE
+        if (rimuoviImmagine) {
+            // Elimina l'immagine dal filesystem se esiste
+            if (esistente.getNomeImmagine() != null) {
+                imageService.deleteImage(esistente.getNomeImmagine());
+            }
+            // Rimuovi i riferimenti all'immagine dall'entità
+            allenamento.setNomeImmagine(null);
+            allenamento.setPathImmagine(null);
+        }
+        // GESTIONE UPLOAD NUOVA IMMAGINE
+        else if (file != null && !file.isEmpty()) {
             if (!imageService.isValidImageFile(file)) {
                 model.addAttribute("errorImmagine", "Formato file non supportato. Usa JPG, JPEG o PNG.");
                 model.addAttribute("allenamento", allenamento);
@@ -113,15 +137,17 @@ public class AdminController {
                 
                 String fileName = imageService.saveImage(file);
                 allenamento.setNomeImmagine(fileName);
-                allenamento.setPathImmagine("/" + fileName);
+                allenamento.setPathImmagine("/images/" + fileName);
             } catch (IOException e) {
                 model.addAttribute("errorImmagine", "Errore nel salvataggio dell'immagine.");
                 model.addAttribute("allenamento", allenamento);
                 addAuthenticationStatus(model);
                 return "formEditAllenamentoConsigliato";
             }
-        } else {
-            // Mantieni l'immagine esistente se non viene caricata una nuova
+        } 
+        // MANTIENI IMMAGINE ESISTENTE
+        else {
+            // Mantieni l'immagine esistente se non viene caricata una nuova e non viene eliminata
             allenamento.setNomeImmagine(esistente.getNomeImmagine());
             allenamento.setPathImmagine(esistente.getPathImmagine());
         }
@@ -140,6 +166,48 @@ public class AdminController {
         }
         allenamentoConsigliatoService.deleteById(id);
         return "redirect:/adminHome";
+    }
+
+    // ========== GESTIONE RECENSIONI (ADMIN) ==========
+
+    @GetMapping("/adminHome/recensioni")
+    public String adminRecensioni(Model model) {
+        if (!isCurrentUserAdmin()) {
+            return "redirect:/";
+        }
+        
+        model.addAttribute("recensioni", recensioneService.findAll());
+        addAuthenticationStatus(model);
+        return "adminRecensioni";
+    }
+    
+    @PostMapping("/adminHome/recensione/{id}/delete")
+    public String deleteRecensioneAsAdmin(@PathVariable("id") Long id) {
+        if (!isCurrentUserAdmin()) {
+            return "redirect:/";
+        }
+        
+        Recensione recensione = recensioneService.findById(id);
+        if (recensione != null) {
+            Long allenamentoId = recensione.getAllenamentoConsigliato().getId();
+            
+            if (recensioneService.deleteRecensioneAsAdmin(id)) {
+                // MODIFICA: Redirect alla pagina normale delle recensioni
+                return "redirect:/allenamentoConsigliato/" + allenamentoId + "/recensioni";
+            }
+        }
+        return "redirect:/adminHome";
+    }
+
+
+    // ========== METODI HELPER ==========
+
+    private boolean isCurrentUserAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && 
+               authentication.isAuthenticated() && 
+               authentication.getAuthorities().stream()
+                   .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
     }
 
     private void addAuthenticationStatus(Model model) {

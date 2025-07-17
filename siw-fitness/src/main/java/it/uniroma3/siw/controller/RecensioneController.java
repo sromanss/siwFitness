@@ -50,14 +50,18 @@ public class RecensioneController {
             if (hasReviewed) {
                 Recensione userReview = recensioneService.findByUtenteAndAllenamentoConsigliato(currentUser, allenamento);
                 model.addAttribute("userReview", userReview);
+                // **AGGIUNTA: Flag per mostrare avviso nel template**
+                model.addAttribute("showReviewWarning", true);
             }
         } else {
             model.addAttribute("hasReviewed", false);
+            model.addAttribute("showReviewWarning", false);
         }
         
         authHelper.addAuthenticationInfo(model);
         return "recensioni";
     }
+
 
     @PostMapping("/allenamentoConsigliato/{id}/recensione")
     public String saveRecensione(@PathVariable("id") Long id,
@@ -112,9 +116,14 @@ public class RecensioneController {
             return "redirect:/";
         }
         
-        // Controlla se ha già recensito
+        // **MODIFICA: Controlla se ha già recensito e mostra avviso**
         if (recensioneService.hasUserReviewed(currentUser, allenamento)) {
-            return "redirect:/allenamentoConsigliato/" + id + "/recensioni";
+            Recensione userReview = recensioneService.findByUtenteAndAllenamentoConsigliato(currentUser, allenamento);
+            model.addAttribute("allenamento", allenamento);
+            model.addAttribute("userReview", userReview);
+            model.addAttribute("warningMessage", "Hai già lasciato una recensione per questo allenamento. Non puoi scriverne un'altra.");
+            authHelper.addAuthenticationInfo(model);
+            return "avvisoRecensioneEsistente"; // Nuovo template
         }
         
         model.addAttribute("allenamento", allenamento);
@@ -123,6 +132,7 @@ public class RecensioneController {
         
         return "formNewRecensione";
     }
+
 
     @GetMapping("/recensione/{id}")
     public String showRecensione(@PathVariable("id") Long id, Model model) {

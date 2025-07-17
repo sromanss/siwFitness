@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recensione Già Scritta - Fitness App</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8f9fa; 
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .header { 
+            background-color: #ffc107; 
+            color: #212529; 
+            padding: 30px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .warning-card {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .review-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            display: inline-block; 
+            margin: 10px 5px; 
+        }
+        .btn-warning { 
+            background-color: #ffc107; 
+            color: #212529; 
+        }
+        .btn-secondary { 
+            background-color: #6c757d; 
+        }
+        .navigation { 
+            text-align: center; 
+            margin-top: 30px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ Recensione Già Presente</h1>
+            <p>Non puoi scrivere un'altra recensione per questo allenamento</p>
+        </div>
+        
+        <!-- Informazioni allenamento -->
+        <div class="review-card">
+            <h4>🏋️ Allenamento: <span th:text="${allenamento.nome}">Nome Allenamento</span></h4>
+            <p><strong>Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
+            <p><strong>Durata:</strong> <span th:text="${#temporals.format(allenamento.durata, 'HH:mm')}">Durata</span></p>
+        </div>
+        
+        <!-- La tua recensione esistente -->
+        <div th:if="${userReview}" class="review-card">
+            <h4>📝 La tua recensione attuale:</h4>
+            <p><strong>Valutazione:</strong> <span th:text="${'⭐'.repeat(userReview.voto)}">⭐⭐⭐⭐⭐</span> (<span th:text="${userReview.voto}">5</span>/5)</p>
+            <p><strong>Commento:</strong> <span th:text="${userReview.testo}">Testo recensione</span></p>
+            <p><strong>Data:</strong> <span th:text="${#temporals.format(userReview.dataCreazione, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</span></p>
+        </div>
+        
+        <!-- Navigazione -->
+        <div class="navigation">
+            <a th:href="@{/recensione/{id}/edit(id=${userReview.id})}" 
+               class="btn btn-warning">✏️ Modifica la tua recensione</a>
+            <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
+               class="btn">📖 Vedi tutte le recensioni</a>
+            <a href="/" class="btn btn-secondary">🏠 Torna alla Home</a>
+        </div>
+    </div>
+</body>
+</html>

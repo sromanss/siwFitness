@@ -40,7 +40,7 @@ public class DataInitializer implements ApplicationRunner {
 
             System.out.println("✅ Utente amministratore creato con successo!");
             System.out.println("Username: admin");
-            System.out.println("Password: admin123!");
+            System.out.println("Password: admin");
         } else {
             System.out.println("ℹ️ Utente amministratore già esistente.");
         }

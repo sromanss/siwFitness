@@ -15,7 +15,16 @@
         .btn { background-color: #ffc107; color: #212529; padding: 12px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 10px 5px; }
         .btn:hover { background-color: #e0a800; }
         .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
         .navigation { text-align: center; margin: 20px 0; }
+        .image-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .current-image { text-align: center; margin: 10px 0; }
+        .checkbox-group { margin: 15px 0; }
+        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 10px; }
+        .checkbox-group label { display: inline; font-weight: normal; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
@@ -23,15 +32,15 @@
         <div class="header">
             <h1>✏️ Modifica Allenamento Consigliato</h1>
             <p th:text="'Modifica: ' + ${allenamento.nome}">Modifica allenamento consigliato</p>
-			
-			<!-- Messaggio errore immagine -->
-			<div th:if="${errorImmagine}">
-			   	<span th:text="${errorImmagine}"></span>
-			</div>
+            
+            <!-- Messaggio errore immagine -->
+            <div th:if="${errorImmagine}" class="alert alert-danger">
+                <span th:text="${errorImmagine}"></span>
+            </div>
         </div>
         
         <div class="form-container">
-            <form th:action="@{/adminHome/{id}(id=${allenamento.id})}" th:object="${allenamento}" method="post" enctype="multipart/form-data" >
+            <form th:action="@{/adminHome/{id}(id=${allenamento.id})}" th:object="${allenamento}" method="post" enctype="multipart/form-data">
                 
                 <div class="form-group">
                     <label for="nome">🏷️ Nome Allenamento:</label>
@@ -74,31 +83,51 @@
                     <label for="descrizione">📝 Descrizione:</label>
                     <textarea id="descrizione" th:field="*{descrizione}"></textarea>
                 </div>
-				<!-- GESTIONE IMMAGINE ESISTENTE E NUOVA -->
-				<div>
-				   	<label>🖼️ Immagine Allenamento:</label>
-				                
-				   	<!-- Mostra immagine esistente se presente -->
-				    <div th:if="${allenamento.pathImmagine}">
-		               <p><strong>Immagine attuale:</strong></p>
-				       <img th:src="${allenamento.pathImmagine}" 
-				            th:alt="${allenamento.nome}" 
-				            width="200" />
-				    </div>
-				                
-				    <!-- Campo per caricare nuova immagine -->
-				    <div>
-				        <label>Carica nuova immagine (opzionale):</label>
-				        <input type="file" name="immagineFile" accept="image/*" />
-				        <small>Formati supportati: JPG, JPEG, PNG (max 10MB). Lascia vuoto per mantenere l'immagine attuale</small>
-				    </div>
-				</div>
+                
+                <!-- GESTIONE IMMAGINE ESISTENTE E NUOVA -->
+                <div class="form-group">
+                    <label>🖼️ Immagine Allenamento:</label>
+                    
+                    <div class="image-section">
+                        <!-- Mostra immagine esistente se presente -->
+                        <div th:if="${allenamento.pathImmagine}" class="current-image">
+                            <p><strong>Immagine attuale:</strong></p>
+                            <img th:src="${allenamento.pathImmagine}" 
+                                 th:alt="${allenamento.nome}" 
+                                 width="200" 
+                                 style="border: 1px solid #ddd; border-radius: 5px;" />
+                            
+                            <!-- Checkbox per eliminare l'immagine corrente -->
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="rimuoviImmagine" name="rimuoviImmagine" value="true">
+                                <label for="rimuoviImmagine">🗑️ Elimina immagine corrente</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Campo per caricare nuova immagine -->
+                        <div>
+                            <label for="immagineFile">Carica nuova immagine:</label>
+                            <input type="file" id="immagineFile" name="immagineFile" accept="image/*" />
+                            <small>Formati supportati: JPG, JPEG, PNG (max 10MB)</small>
+                        </div>
+                        
+                        <!-- Istruzioni per l'utente -->
+                        <div style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+                            <strong>Come funziona:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Per <strong>sostituire</strong> l'immagine: carica un nuovo file</li>
+                                <li>Per <strong>eliminare</strong> l'immagine: spunta la checkbox sopra</li>
+                                <li>Per <strong>mantenere</strong> l'immagine: non fare nulla</li>
+								(caricando una nuova immagine, la precedente verrà automaticamente sostituita)
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="navigation">
                     <button type="submit" class="btn">💾 Salva Modifiche</button>
                     <a href="/adminHome" class="btn btn-secondary">❌ Annulla</a>
                 </div>
-                
             </form>
         </div>
     </div>

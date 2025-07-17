@@ -83,6 +83,42 @@
         .actions { 
             margin-top: 15px; 
         }
+        
+        /* Stili per la sezione recensioni */
+        .recensioni-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .rating-stars {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .rating-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .recensioni-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .btn-review {
+            background-color: #17a2b8;
+        }
+        .btn-review:hover {
+            background-color: #138496;
+        }
     </style>
 </head>
 <body>
@@ -111,32 +147,67 @@
         
         <div class="navigation">
             <a href="/adminHome/new" class="btn btn-success">➕ Nuovo Allenamento Consigliato</a>
+            <a href="/adminHome/recensioni" class="btn btn-review">📖 Gestisci Recensioni</a>
         </div>
         
-		<h2>🌟 Allenamenti Consigliati</h2>
+        <h2>🌟 Allenamenti Consigliati</h2>
 
-				<div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
-				    <div th:each="allenamento : ${allenamenti}" class="allenamento-card" 
-				         style="display: flex; gap: 20px; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 12px; background-color: #fff;">
-				        
-				        <!-- INFORMAZIONI ALLENAMENTO A SINISTRA -->
-				        <div style="flex: 1;">
-				            <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
-				            <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
-				            <p><strong>⏱️ Durata:</strong> <span th:text="${allenamento.durata}">Durata</span></p>
-				            <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
-				            <p th:text="${allenamento.descrizione}">Descrizione allenamento</p>
-				        </div>
-				        
-				        <!-- IMMAGINE A DESTRA (solo se presente) -->
-				        <div th:if="${allenamento.pathImmagine}" style="flex-shrink: 0;">
-				            <img th:src="${allenamento.pathImmagine}" 
-				                 th:alt="${allenamento.nome}" 
-				                 style="width: 300px; height: 200px; object-fit: cover; border-radius: 8px;" />
-				        </div>
+        <div th:if="${allenamenti != null and !allenamenti.isEmpty()}">
+            <div th:each="allenamento : ${allenamenti}" class="allenamento-card">
                 
-				<!-- INFORMAZIONI ALLENAMENTO -->
-				
+                <!-- Layout principale con informazioni e immagine -->
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    
+                    <!-- INFORMAZIONI ALLENAMENTO A SINISTRA -->
+                    <div style="flex: 1;">
+                        <h3 th:text="${allenamento.nome}">Nome Allenamento</h3>
+                        <p><strong>🏃 Tipo Sport:</strong> <span th:text="${allenamento.tipoSport}">Tipo Sport</span></p>
+                        <p><strong>⏱️ Durata:</strong> <span th:text="${#temporals.format(allenamento.durata, 'HH:mm')}">Durata</span></p>
+                        <p><strong>📊 Livello:</strong> <span th:text="${allenamento.livelloDifficolta}">Livello</span></p>
+                        <p th:if="${allenamento.descrizione}" th:text="${allenamento.descrizione}">Descrizione allenamento</p>
+                    </div>
+                    
+                    <!-- IMMAGINE A DESTRA (solo se presente) -->
+                    <div th:if="${allenamento.pathImmagine}" style="flex-shrink: 0;">
+                        <img th:src="${allenamento.pathImmagine}" 
+                             th:alt="${allenamento.nome}" 
+                             style="width: 300px; height: 200px; object-fit: cover; border-radius: 8px;" />
+                    </div>
+                </div>
+
+                <!-- SEZIONE RECENSIONI -->
+                <div class="recensioni-section">
+                    <div class="rating-display">
+                        <span style="font-weight: bold;">⭐ Recensioni:</span>
+                        
+                        <!-- Se ci sono recensioni, mostra la media -->
+                        <div th:if="${allenamento.numeroRecensioni != null and allenamento.numeroRecensioni > 0}">
+                            <span class="rating-stars">
+                                <span th:text="${allenamento.mediaVoti != null ? #numbers.formatDecimal(allenamento.mediaVoti, 1, 1) : '0.0'}">4.5</span>⭐
+                            </span>
+                            <span class="rating-text">
+                                (<span th:text="${allenamento.numeroRecensioni}">3</span> 
+                                <span th:text="${allenamento.numeroRecensioni == 1 ? 'recensione' : 'recensioni'}">recensioni</span>)
+                            </span>
+                        </div>
+                        
+                        <!-- Se non ci sono recensioni -->
+                        <span th:if="${allenamento.numeroRecensioni == null or allenamento.numeroRecensioni == 0}" class="rating-text">
+                            Non ci sono ancora recensioni.
+                        </span>
+                    </div>
+                    
+                    <!-- Azioni per le recensioni -->
+                    <div class="recensioni-actions">
+                        <!-- Pulsante per leggere le recensioni -->
+                        <a th:href="@{/allenamentoConsigliato/{id}/recensioni(id=${allenamento.id})}" 
+                           class="btn btn-review btn-small">
+                            📖 Leggi recensioni
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- AZIONI AMMINISTRATIVE -->
                 <div class="actions">
                     <a th:href="@{/adminHome/{id}/edit(id=${allenamento.id})}" class="btn btn-warning">✏️ Modifica</a>
                     <form th:action="@{/adminHome/{id}/delete(id=${allenamento.id})}" 

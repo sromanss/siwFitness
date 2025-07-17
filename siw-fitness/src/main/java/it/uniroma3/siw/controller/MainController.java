@@ -1,5 +1,7 @@
 package it.uniroma3.siw.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -7,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import it.uniroma3.siw.model.AllenamentoConsigliato;
 import it.uniroma3.siw.service.AllenamentoConsigliatoService;
@@ -18,10 +21,16 @@ public class MainController {
     private AllenamentoConsigliatoService allenamentoConsigliatoService;
     
     @GetMapping("/")
-    public String index(Model model) {
-        // Mostra gli allenamenti consigliati (lista vuota se non ce ne sono)
-        Iterable<AllenamentoConsigliato> allenamenti = allenamentoConsigliatoService.findAll();
+    public String index(@RequestParam(required = false) String search,
+                       @RequestParam(required = false) String sortBy,
+                       Model model) {
+        
+        // Recupera allenamenti con filtri e ordinamento
+        List<AllenamentoConsigliato> allenamenti = allenamentoConsigliatoService.findAllWithFilters(search, sortBy);
+        
         model.addAttribute("allenamenti", allenamenti);
+        model.addAttribute("currentSearch", search);
+        model.addAttribute("currentSort", sortBy);
         
         // Verifica se l'utente è autenticato
         addAuthenticationStatus(model);
