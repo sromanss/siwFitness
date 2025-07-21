@@ -16,6 +16,9 @@ import it.uniroma3.siw.service.AuthenticationService;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Controller
@@ -30,16 +33,51 @@ public class RecensioneController {
     @Autowired
     private AuthenticationService authHelper;
 
-    // ACCESSO PUBBLICO - Non richiede autenticazione
+    // ✅ METODO CORRETTO CON ORDINAMENTO
     @GetMapping("/allenamentoConsigliato/{id}/recensioni")
-    public String showRecensioni(@PathVariable("id") Long id, Model model) {
+    public String showRecensioni(@PathVariable("id") Long id,
+                                @RequestParam(name = "reviewSort", required = false) String reviewSort,
+                                @RequestParam(name = "reviewSortDirection", required = false) String reviewSortDirection,
+                                Model model) {
         AllenamentoConsigliato allenamento = allenamentoConsigliatoService.findById(id);
         if (allenamento == null) {
             return "redirect:/";
         }
         
+        // Recupera le recensioni
+        List<Recensione> recensioni = new ArrayList<>(recensioneService.findByAllenamentoConsigliato(allenamento));
+        
+        // ✅ APPLICA ORDINAMENTO ALLE RECENSIONI
+        if (reviewSort != null && !recensioni.isEmpty()) {
+            switch (reviewSort) {
+                case "insertion":
+                    // Ordinamento per data di creazione (con fallback su ID)
+                    if (recensioni.get(0).getDataCreazione() != null) {
+                        recensioni.sort(Comparator.comparing(Recensione::getDataCreazione));
+                    } else {
+                        recensioni.sort(Comparator.comparing(Recensione::getId));
+                    }
+                    break;
+                case "rating":
+                    recensioni.sort(Comparator.comparing(Recensione::getVoto));
+                    break;
+            }
+            
+            // Applica l'inversione se richiesta
+            if ("desc".equals(reviewSortDirection)) {
+                Collections.reverse(recensioni);
+            }
+        } else {
+            // Ordinamento predefinito: più recenti prima
+            if (!recensioni.isEmpty() && recensioni.get(0).getDataCreazione() != null) {
+                recensioni.sort(Comparator.comparing(Recensione::getDataCreazione).reversed());
+            } else {
+                recensioni.sort(Comparator.comparing(Recensione::getId).reversed());
+            }
+        }
+        
         model.addAttribute("allenamento", allenamento);
-        model.addAttribute("recensioni", recensioneService.findByAllenamentoConsigliato(allenamento));
+        model.addAttribute("recensioni", recensioni);
         
         // Gestione utente autenticato (opzionale)
         User currentUser = authHelper.getCurrentUser();
@@ -50,7 +88,6 @@ public class RecensioneController {
             if (hasReviewed) {
                 Recensione userReview = recensioneService.findByUtenteAndAllenamentoConsigliato(currentUser, allenamento);
                 model.addAttribute("userReview", userReview);
-                // **AGGIUNTA: Flag per mostrare avviso nel template**
                 model.addAttribute("showReviewWarning", true);
             }
         } else {
@@ -61,7 +98,6 @@ public class RecensioneController {
         authHelper.addAuthenticationInfo(model);
         return "recensioni";
     }
-
 
     @PostMapping("/allenamentoConsigliato/{id}/recensione")
     public String saveRecensione(@PathVariable("id") Long id,
@@ -132,7 +168,6 @@ public class RecensioneController {
         
         return "formNewRecensione";
     }
-
 
     @GetMapping("/recensione/{id}")
     public String showRecensione(@PathVariable("id") Long id, Model model) {
